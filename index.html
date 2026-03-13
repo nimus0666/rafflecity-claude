@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RaffleCity — The Web3 Raffle Ecosystem</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #060713;
+      --surface: rgba(18,20,44,0.80);
+      --border: rgba(255,255,255,0.07);
+      --border-bright: rgba(255,255,255,0.12);
+      --grad: linear-gradient(90deg, #7b5cff 0%, #f24fc8 100%);
+      --violet: #7b5cff;
+      --pink: #f24fc8;
+      --white: #ffffff;
+      --w80: rgba(255,255,255,0.80);
+      --w55: rgba(255,255,255,0.55);
+      --w30: rgba(255,255,255,0.30);
+      --w10: rgba(255,255,255,0.10);
+      --w06: rgba(255,255,255,0.06);
+      --w04: rgba(255,255,255,0.04);
+      --font: 'Inter', sans-serif;
+      --nav-h: 72px;
+      --max: 1200px;
+      --r: 20px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% -10%, rgba(123,92,255,.18) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 10% 30%, rgba(242,79,200,.07) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 30% at 90% 60%, rgba(123,92,255,.06) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .wrap {
+      width: 100%;
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* REVEAL */
+    .fade { opacity: 0; transform: translateY(22px); transition: opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+    .fade.in { opacity: 1; transform: translateY(0); }
+    .fade.d1 { transition-delay: .10s; }
+    .fade.d2 { transition-delay: .20s; }
+    .fade.d3 { transition-delay: .30s; }
+
+    /* SHARED */
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 7px 14px; border-radius: 999px;
+      border: 1px solid var(--border-bright); background: var(--w06);
+      font-size: 11px; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: rgba(255,255,255,.70); margin-bottom: 22px;
+    }
+    .eyebrow::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--grad); flex-shrink: 0; }
+
+    h2.title {
+      font-size: clamp(38px, 4.5vw, 58px); font-weight: 800;
+      letter-spacing: -.03em; line-height: 1.04;
+      background: linear-gradient(100deg, #fff 30%, #d6c8ff 65%, #ff90de 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 18px;
+    }
+    p.lead { font-size: 17px; line-height: 1.75; color: var(--w55); font-weight: 400; max-width: 600px; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 26px; border-radius: 14px; font-size: 14px; font-weight: 700;
+      border: none; cursor: pointer;
+      transition: transform .2s, box-shadow .2s; text-decoration: none;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: var(--grad); color: #fff; box-shadow: 0 8px 28px rgba(123,92,255,.28); }
+    .btn-primary:hover { box-shadow: 0 14px 36px rgba(123,92,255,.38); }
+    .btn-ghost { background: var(--w06); border: 1px solid var(--border-bright); color: var(--w80); }
+    .btn-ghost:hover { border-color: rgba(123,92,255,.35); background: rgba(123,92,255,.08); }
+
+    .glass { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); backdrop-filter: blur(12px); }
+
+    /* ── NAV ── */
+    .nav {
+      position: sticky; top: 0; z-index: 100; height: var(--nav-h);
+      display: flex; align-items: center;
+      background: rgba(6,7,19,.82); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-logo { height: 32px; width: auto; object-fit: contain; }
+    .nav-links { display: flex; justify-content: center; gap: 4px; }
+    .nav-links a { padding: 8px 13px; border-radius: 11px; font-size: 13px; font-weight: 600; color: var(--w55); transition: color .2s, background .2s; }
+    .nav-links a:hover { color: #fff; background: var(--w06); }
+    .nav-right { display: flex; gap: 8px; align-items: center; }
+    .nav-social { padding: 8px 14px; border-radius: 11px; background: var(--w06); border: 1px solid var(--border-bright); font-size: 12px; font-weight: 700; color: var(--w80); transition: border-color .2s, background .2s; }
+    .nav-social:hover { border-color: rgba(123,92,255,.3); background: rgba(123,92,255,.08); }
+    .nav-cta { padding: 9px 18px; border-radius: 11px; background: var(--grad); font-size: 13px; font-weight: 700; color: #fff; box-shadow: 0 6px 20px rgba(123,92,255,.25); transition: transform .2s, box-shadow .2s; }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(123,92,255,.35); }
+
+    /* ── HERO ── */
+    .hero { min-height: calc(100vh - var(--nav-h)); display: flex; align-items: center; padding: 80px 0 100px; position: relative; overflow: hidden; }
+    .hero-grid { display: grid; grid-template-columns: 1fr 400px; gap: 56px; align-items: center; }
+    .hero-h1 { font-size: clamp(50px, 6.5vw, 82px); font-weight: 900; letter-spacing: -.05em; line-height: .97; color: #fff; margin-bottom: 22px; }
+    .hero-h1 span { background: linear-gradient(95deg, #fff 0%, #d8cbff 40%, #ff90de 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-sub { font-size: 17px; line-height: 1.75; color: var(--w55); max-width: 520px; margin-bottom: 32px; }
+    .hero-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+    .hero-pill { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border-bright); background: var(--w04); font-size: 12.5px; font-weight: 600; color: var(--w80); }
+    .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* MINT CARD */
+    .mint-card { padding: 28px; position: relative; overflow: hidden; }
+    .mint-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(123,92,255,.6), rgba(242,79,200,.6), transparent); }
+    .mint-card-label { font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--w30); margin-bottom: 10px; }
+    .mint-countdown { font-size: 38px; font-weight: 900; letter-spacing: -.03em; line-height: 1; color: #fff; margin-bottom: 18px; }
+    .mint-countdown span { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .prog-track { width: 100%; height: 5px; background: var(--w10); border-radius: 999px; overflow: hidden; margin-bottom: 7px; }
+    .prog-fill { height: 100%; width: 45%; background: var(--grad); border-radius: 999px; box-shadow: 0 0 10px rgba(242,79,200,.4); }
+    .prog-note { font-size: 12px; color: var(--w30); margin-bottom: 22px; }
+    .mint-divider { height: 1px; background: var(--border); margin: 20px 0; }
+    .mint-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .mint-stat { background: var(--w04); border: 1px solid var(--border); border-radius: 13px; padding: 14px; }
+    .mint-stat-val { font-size: 22px; font-weight: 900; color: #fff; letter-spacing: -.02em; line-height: 1; margin-bottom: 4px; }
+    .mint-stat-val.accent { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .mint-stat-key { font-size: 10.5px; color: var(--w30); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+    .wallet-list { display: flex; flex-direction: column; gap: 7px; }
+    .wallet-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-radius: 12px; background: var(--w04); border: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--w80); transition: border-color .2s, background .2s, transform .15s; }
+    .wallet-item:hover { border-color: rgba(123,92,255,.3); background: rgba(123,92,255,.06); transform: translateX(2px); }
+    .wallet-arrow { color: var(--violet); font-size: 15px; }
+
+    /* ── SECTIONS ── */
+    section { padding: 100px 0; position: relative; z-index: 1; }
+
+    /* ── STATS ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+    .stat-cell { background: var(--bg); padding: 40px 32px; transition: background .25s; }
+    .stat-cell:hover { background: #0c0e22; }
+    .stat-num { font-size: 52px; font-weight: 900; letter-spacing: -.04em; line-height: 1; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; }
+    .stat-lbl { font-size: 13px; color: var(--w55); }
+
+    /* ── MARKET ── */
+    .market-img-wrap { margin-top: 36px; border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); box-shadow: 0 24px 60px rgba(0,0,0,.5); }
+    .market-img-wrap img { width: 100%; height: auto; display: block; }
+
+    /* ── WARMUP ── */
+    .warmup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
+    .warmup-body p { font-size: 16px; line-height: 1.8; color: var(--w55); margin-bottom: 16px; }
+    .warmup-body strong { color: #fff; font-weight: 600; }
+    .warmup-img-card { border-radius: var(--r); overflow: hidden; border: 1px solid rgba(123,92,255,.2); box-shadow: 0 30px 70px rgba(0,0,0,.55), 0 0 60px rgba(123,92,255,.08); }
+    .warmup-img-card img { width: 100%; height: auto; display: block; }
+
+    /* ── RAFFLE ── */
+    .raffle-banner { padding: 52px; position: relative; overflow: hidden; margin-bottom: 32px; }
+    .raffle-banner::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 55% 70% at 85% 50%, rgba(123,92,255,.09) 0%, transparent 65%), radial-gradient(ellipse 35% 50% at 15% 50%, rgba(242,79,200,.07) 0%, transparent 55%); pointer-events: none; }
+    .raffle-banner::after { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 10%, rgba(123,92,255,.5) 40%, rgba(242,79,200,.5) 60%, transparent 90%); }
+    .raffle-layout { display: grid; grid-template-columns: 1fr auto; gap: 50px; align-items: center; position: relative; z-index: 1; }
+    .raffle-title { font-size: clamp(40px, 4.5vw, 62px); font-weight: 900; letter-spacing: -.04em; line-height: .96; color: #fff; margin-bottom: 16px; }
+    .raffle-title .pink { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .raffle-desc { font-size: 16px; color: var(--w55); line-height: 1.75; max-width: 520px; }
+    .prize-list { display: flex; flex-direction: column; gap: 10px; min-width: 220px; }
+    .prize-row { display: flex; align-items: center; gap: 13px; padding: 13px 16px; background: var(--w04); border: 1px solid var(--border-bright); border-radius: 13px; transition: border-color .2s, transform .2s; }
+    .prize-row:hover { border-color: rgba(242,79,200,.3); transform: translateX(-3px); }
+    .prize-emoji { font-size: 22px; }
+    .prize-name { font-weight: 700; font-size: 14px; color: #fff; }
+    .prize-tag { font-size: 11px; color: var(--w30); margin-top: 1px; }
+    .prize-cards-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; margin-bottom: 28px; }
+    .prize-card { border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); background: var(--surface); transition: transform .25s, border-color .25s; }
+    .prize-card:hover { transform: translateY(-5px); border-color: rgba(123,92,255,.25); }
+    .prize-visual { height: 160px; display: flex; align-items: center; justify-content: center; font-size: 64px; }
+    .prize-visual.btc { background: radial-gradient(ellipse at 50% 30%, rgba(247,147,26,.18) 0%, transparent 65%), #0c0c16; }
+    .prize-visual.eth { background: radial-gradient(ellipse at 50% 30%, rgba(98,126,234,.18) 0%, transparent 65%), #0a0c1a; }
+    .prize-visual.nft { background: radial-gradient(ellipse at 50% 30%, rgba(34,211,238,.14) 0%, transparent 65%), #090e14; }
+    .prize-card-body { padding: 18px 20px; }
+    .prize-card-name { font-size: 22px; font-weight: 800; letter-spacing: -.02em; color: #fff; margin-bottom: 5px; }
+    .prize-card-desc { font-size: 13px; color: var(--w55); line-height: 1.6; }
+    .boost-row { padding: 28px 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .boost-text strong { display: block; font-size: 16px; color: #fff; margin-bottom: 5px; }
+    .boost-text p { font-size: 13.5px; color: var(--w55); line-height: 1.65; }
+
+    /* ── TIERS ── */
+    .tiers-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 48px; }
+    .tier-card { border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); background: var(--surface); transition: transform .3s, border-color .3s, box-shadow .3s; position: relative; }
+    .tier-card:hover { transform: translateY(-7px); border-color: rgba(123,92,255,.28); box-shadow: 0 24px 50px rgba(0,0,0,.4), 0 0 40px rgba(123,92,255,.06); }
+    .tier-card.mid { border-color: rgba(123,92,255,.22); }
+    .tier-card.mid::before { content: "POPULAR"; position: absolute; top: 0; left: 50%; transform: translateX(-50%) translateY(-1px); background: var(--grad); color: #fff; font-size: 9px; font-weight: 800; letter-spacing: .14em; padding: 5px 14px; border-radius: 0 0 8px 8px; z-index: 2; }
+    .tier-visual { height: 180px; display: flex; align-items: center; justify-content: center; font-size: 76px; }
+    .tier-visual.bronze { background: radial-gradient(ellipse at 50% 30%, rgba(205,127,50,.22) 0%, transparent 65%), #100e0a; }
+    .tier-visual.silver { background: radial-gradient(ellipse at 50% 30%, rgba(180,190,220,.18) 0%, transparent 65%), #0c0d14; }
+    .tier-visual.gold { background: radial-gradient(ellipse at 50% 30%, rgba(123,92,255,.26) 0%, transparent 65%), #0d0b18; }
+    .tier-medal { animation: float 4s ease-in-out infinite; display: block; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    .tier-body { padding: 24px; }
+    .tier-name { font-size: 26px; font-weight: 900; letter-spacing: -.03em; color: #fff; margin-bottom: 3px; }
+    .tier-sub { font-size: 11px; color: var(--w30); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 18px; }
+    .tier-price { font-size: 36px; font-weight: 900; letter-spacing: -.03em; line-height: 1; margin-bottom: 4px; }
+    .tier-price.bronze { color: #cd7f32; }
+    .tier-price.silver { color: #b4bed4; }
+    .tier-price.gold { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .tier-supply { font-size: 11.5px; color: var(--w30); margin-bottom: 20px; }
+    .tier-perks { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
+    .tier-perks li { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; color: var(--w80); line-height: 1.5; }
+    .tier-perks li::before { content: "✓"; width: 18px; height: 18px; border-radius: 5px; background: rgba(123,92,255,.12); border: 1px solid rgba(123,92,255,.25); color: var(--violet); font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .boost-pill { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 700; letter-spacing: .05em; }
+    .boost-pill.bronze { background: rgba(205,127,50,.12); color: #cd7f32; border: 1px solid rgba(205,127,50,.25); }
+    .boost-pill.silver { background: rgba(180,190,220,.10); color: #b4bed4; border: 1px solid rgba(180,190,220,.22); }
+    .boost-pill.gold { background: rgba(123,92,255,.12); color: #c4aaff; border: 1px solid rgba(123,92,255,.28); }
+
+    /* ── BENEFITS ── */
+    .benefits-hero { padding: 52px; position: relative; overflow: hidden; margin-bottom: 28px; }
+    .benefits-hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 95% 50%, rgba(123,92,255,.08) 0%, transparent 60%); pointer-events: none; }
+    .benefits-hero::after { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 10%, rgba(123,92,255,.45) 40%, rgba(242,79,200,.45) 60%, transparent 90%); }
+    .bh-layout { display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center; position: relative; z-index: 1; }
+    .bh-title { font-size: clamp(38px, 4.5vw, 56px); font-weight: 900; letter-spacing: -.04em; line-height: 1.0; color: #fff; margin-bottom: 14px; }
+    .bh-title span { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .bh-desc { font-size: 15.5px; color: var(--w55); line-height: 1.75; max-width: 480px; }
+    .bh-big { text-align: center; line-height: 1; }
+    .bh-num { font-size: 100px; font-weight: 900; letter-spacing: -.05em; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .bh-sub { font-size: 13px; color: var(--w30); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-top: 4px; }
+    .benefits-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+    .benefit-card { padding: 26px 22px; border-radius: var(--r); background: var(--w04); border: 1px solid var(--border); transition: border-color .25s, transform .25s; }
+    .benefit-card:hover { border-color: rgba(123,92,255,.22); transform: translateY(-3px); }
+    .bc-icon { font-size: 28px; margin-bottom: 14px; }
+    .bc-title { font-size: 16px; font-weight: 800; color: #fff; letter-spacing: -.02em; margin-bottom: 9px; }
+    .bc-body { font-size: 13.5px; color: var(--w55); line-height: 1.7; }
+
+    /* ── TOKENOMICS ── */
+    .token-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
+    .token-ring-wrap { position: relative; width: 100%; max-width: 340px; aspect-ratio: 1; margin: 0 auto; }
+    .token-ring-wrap svg { width: 100%; height: auto; }
+    .token-legend { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+    .tl-item { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border-radius: 13px; background: var(--w04); border: 1px solid var(--border); }
+    .tl-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .tl-label { font-size: 13px; font-weight: 600; color: #fff; flex: 1; }
+    .tl-pct { font-size: 20px; font-weight: 900; letter-spacing: -.02em; color: #fff; }
+    .token-right { padding-top: 8px; }
+    .token-name { font-size: 72px; font-weight: 900; letter-spacing: -.04em; line-height: 1; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 12px; }
+    .token-desc { font-size: 16px; color: var(--w55); line-height: 1.75; margin-bottom: 28px; max-width: 480px; }
+    .util-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+    .util-tag { padding: 8px 14px; border-radius: 999px; background: var(--w06); border: 1px solid var(--border-bright); font-size: 12.5px; font-weight: 600; color: var(--w80); }
+    .flywheel { padding: 22px; border-radius: 16px; background: var(--w04); border: 1px solid var(--border); }
+    .fw-label { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--w30); margin-bottom: 15px; }
+    .fw-steps { display: flex; flex-direction: column; gap: 3px; }
+    .fw-row { display: flex; align-items: center; gap: 10px; padding: 11px 13px; border-radius: 10px; background: var(--w04); font-size: 13px; color: var(--w80); font-weight: 500; }
+    .fw-n { width: 22px; height: 22px; border-radius: 6px; background: rgba(123,92,255,.12); border: 1px solid rgba(123,92,255,.22); color: var(--violet); font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .fw-arrow { padding: 0 0 0 32px; font-size: 13px; color: var(--w30); }
+
+    /* ── ROADMAP ── */
+    .roadmap-track { position: relative; padding-left: 56px; }
+    .roadmap-track::before { content: ""; position: absolute; left: 20px; top: 24px; bottom: 24px; width: 2px; background: linear-gradient(180deg, var(--violet) 0%, rgba(123,92,255,.15) 100%); }
+    .rm-item { position: relative; margin-bottom: 20px; }
+    .rm-dot { position: absolute; left: -42px; top: 24px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); border: 2px solid var(--violet); box-shadow: 0 0 14px rgba(123,92,255,.35); }
+    .rm-card { border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); background: var(--surface); transition: border-color .25s; }
+    .rm-card:hover { border-color: rgba(123,92,255,.25); }
+    .rm-inner { display: grid; grid-template-columns: 140px 1fr; }
+    .rm-phase { padding: 26px 20px; background: rgba(123,92,255,.06); border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; }
+    .rm-phase-lbl { font-size: 9px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--w30); margin-bottom: 6px; }
+    .rm-phase-num { font-size: 46px; font-weight: 900; letter-spacing: -.03em; line-height: 1; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .rm-content { padding: 28px 30px; }
+    .rm-tag { display: inline-block; padding: 4px 10px; border-radius: 999px; background: var(--w06); border: 1px solid var(--border-bright); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--w55); margin-bottom: 10px; }
+    .rm-title { font-size: 24px; font-weight: 800; letter-spacing: -.03em; color: #fff; margin-bottom: 9px; }
+    .rm-body { font-size: 14px; color: var(--w55); line-height: 1.75; }
+
+    /* ── VERTICALS ── */
+    .vert-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; }
+    .vert-card { padding: 24px 18px; border-radius: var(--r); background: var(--w04); border: 1px solid var(--border); text-align: center; transition: border-color .25s, transform .25s; }
+    .vert-card:hover { border-color: rgba(123,92,255,.22); transform: translateY(-4px); }
+    .vert-icon { font-size: 32px; margin-bottom: 14px; display: block; }
+    .vert-name { font-size: 15px; font-weight: 800; letter-spacing: -.02em; color: #fff; margin-bottom: 7px; }
+    .vert-desc { font-size: 12.5px; color: var(--w55); line-height: 1.6; }
+
+    /* ── FAQ ── */
+    .faq-list { display: flex; flex-direction: column; gap: 8px; }
+    .faq-item { border-radius: 16px; background: var(--w04); border: 1px solid var(--border); overflow: hidden; transition: border-color .2s; }
+    .faq-item:hover { border-color: rgba(123,92,255,.2); }
+    .faq-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 20px 22px; background: none; border: none; color: #fff; font-family: var(--font); font-size: 15px; font-weight: 700; text-align: left; cursor: pointer; gap: 14px; }
+    .faq-plus { width: 26px; height: 26px; border-radius: 8px; background: var(--w06); border: 1px solid var(--border-bright); display: flex; align-items: center; justify-content: center; color: var(--violet); font-size: 18px; font-weight: 300; flex-shrink: 0; transition: transform .25s, background .2s; line-height: 1; }
+    .faq-item.open .faq-plus { transform: rotate(45deg); background: rgba(123,92,255,.12); }
+    .faq-body { max-height: 0; overflow: hidden; transition: max-height .35s cubic-bezier(.22,1,.36,1); }
+    .faq-item.open .faq-body { max-height: 180px; }
+    .faq-body-inner { padding: 0 22px 20px; font-size: 14px; color: var(--w55); line-height: 1.75; border-top: 1px solid var(--border); padding-top: 16px; margin-top: -1px; }
+    .faq-body-inner strong { color: #fff; font-weight: 600; }
+
+    /* ── CTA ── */
+    .cta-box { padding: 72px 60px; text-align: center; position: relative; overflow: hidden; }
+    .cta-box::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 55% 70% at 50% 0%, rgba(123,92,255,.14) 0%, transparent 60%), radial-gradient(ellipse 35% 40% at 5% 100%, rgba(242,79,200,.07) 0%, transparent 55%); pointer-events: none; }
+    .cta-box::after { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 10%, rgba(123,92,255,.5) 38%, rgba(242,79,200,.5) 62%, transparent 90%); }
+    .cta-title { font-size: clamp(44px, 5.5vw, 72px); font-weight: 900; letter-spacing: -.04em; line-height: .97; color: #fff; margin-bottom: 18px; position: relative; z-index: 1; }
+    .cta-title span { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .cta-sub { font-size: 17px; color: var(--w55); max-width: 520px; margin: 0 auto 34px; line-height: 1.75; position: relative; z-index: 1; }
+    .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 26px; position: relative; z-index: 1; }
+    .cta-socials { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; }
+    .social-pill { padding: 10px 18px; border-radius: 999px; background: var(--w04); border: 1px solid var(--border-bright); font-size: 13px; font-weight: 600; color: var(--w80); transition: border-color .2s, background .2s, transform .2s; }
+    .social-pill:hover { border-color: rgba(123,92,255,.3); background: rgba(123,92,255,.07); transform: translateY(-2px); }
+
+    /* ── FOOTER ── */
+    footer { padding: 50px 0 36px; border-top: 1px solid var(--border); position: relative; z-index: 1; }
+    .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 56px; margin-bottom: 40px; }
+    .footer-logo { height: 36px; width: auto; filter: none; margin-bottom: 14px; display: block; }
+    .footer-desc { font-size: 14px; color: var(--w30); line-height: 1.75; max-width: 360px; margin-bottom: 20px; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 7px; }
+    .footer-link { padding: 7px 13px; border-radius: 9px; background: var(--w04); border: 1px solid var(--border); font-size: 12.5px; font-weight: 600; color: var(--w55); transition: color .2s, border-color .2s; }
+    .footer-link:hover { color: #fff; border-color: var(--border-bright); }
+    .footer-right h4 { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--w30); margin-bottom: 14px; }
+    .footer-hi { display: flex; flex-direction: column; gap: 10px; }
+    .footer-hi-item { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--w55); }
+    .footer-hi-item::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--grad); flex-shrink: 0; }
+    .footer-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 22px; border-top: 1px solid var(--border); }
+    .footer-copy { font-size: 12px; color: var(--w30); }
+    .footer-mini { display: flex; gap: 16px; }
+    .footer-mini a { font-size: 12px; color: var(--w30); transition: color .2s; }
+    .footer-mini a:hover { color: #fff; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      .nav-links { display: none; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .mint-card { display: none; }
+      .vert-grid { grid-template-columns: repeat(3,1fr); }
+    }
+    @media (max-width: 860px) {
+      section { padding: 72px 0; }
+      .stats-row { grid-template-columns: repeat(2,1fr); }
+      .raffle-layout { grid-template-columns: 1fr; }
+      .prize-cards-row { grid-template-columns: 1fr; max-width: 320px; }
+      .warmup-grid { grid-template-columns: 1fr; }
+      .tiers-grid { grid-template-columns: 1fr; max-width: 380px; margin-inline: auto; }
+      .benefits-grid { grid-template-columns: 1fr 1fr; }
+      .bh-layout { grid-template-columns: 1fr; }
+      .token-layout { grid-template-columns: 1fr; }
+      .rm-inner { grid-template-columns: 1fr; }
+      .rm-phase { border-right: none; border-bottom: 1px solid var(--border); padding: 18px 20px; flex-direction: row; gap: 10px; align-items: center; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .vert-grid { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 580px) {
+      .wrap { padding: 0 18px; }
+      section { padding: 60px 0; }
+      .benefits-grid { grid-template-columns: 1fr; }
+      .cta-box { padding: 44px 22px; }
+      .raffle-banner { padding: 28px 22px; }
+      .benefits-hero { padding: 28px 22px; }
+      .boost-row { flex-direction: column; align-items: flex-start; }
+      .footer-bottom { flex-direction: column; gap: 12px; }
+      .vert-grid { grid-template-columns: 1fr 1fr; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="wrap">
+      <div class="nav-inner">
+        <a href="#hero" class="brand">
+          <img src="rafflecity-logo-full-transparent.png" alt="RaffleCity" class="brand-logo">
+        </a>
+        <div class="nav-links">
+          <a href="#market">Market</a>
+          <a href="#founder">Vision</a>
+          <a href="#platform">Platform</a>
+          <a href="#warmup">Warm Up</a>
+          <a href="#raffle">Mega Raffle</a>
+          <a href="#nfts">Founder NFTs</a>
+          <a href="#tokenomics">Token</a>
+          <a href="#roadmap">Roadmap</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <div class="nav-right">
+          <a class="nav-social" href="https://discord.gg/k9apu7HKtm" target="_blank" rel="noopener">Discord</a>
+          <a class="nav-social" href="https://twitter.com/raffle_city" target="_blank" rel="noopener">X</a>
+          <a class="nav-cta" href="#nfts">Join Early</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero" style="padding: 0;">
+    <div style="min-height:calc(100vh - var(--nav-h)); display:flex; align-items:center; padding: 80px 0 100px; position:relative;">
+      <div class="wrap">
+        <div class="hero-grid">
+          <div>
+            <div class="fade">
+              <span class="eyebrow">Solana Founder Mint</span>
+            </div>
+            <h1 class="hero-h1 fade d1">
+              Enter the Founder Club<br>of the <span>first Web3<br>raffle ecosystem</span>
+            </h1>
+            <p class="hero-sub fade d2">Secure your Founder NFT, access recurring holder utility, earn Warm Up advantages and position yourself before the biggest RaffleCity launch events begin.</p>
+            <div class="hero-pills fade d2">
+              <span class="hero-pill">🔥 Warm Up Access</span>
+              <span class="hero-pill">🎟️ Monthly Free Raffles</span>
+              <span class="hero-pill">⚡ Launch Boosts</span>
+            </div>
+            <div class="hero-ctas fade d3">
+              <a class="btn btn-primary" href="#nfts">Secure Your Spot →</a>
+              <a class="btn btn-ghost" href="https://gitbook.rafflecity.io/rafflecity" target="_blank" rel="noopener">Read Whitepaper</a>
+            </div>
+          </div>
+
+          <div class="mint-card glass fade d2">
+            <div class="mint-card-label">// Mint Countdown</div>
+            <div class="mint-countdown" id="mintCountdown"><span>6d 23h</span> 28m</div>
+            <div class="prog-track"><div class="prog-fill"></div></div>
+            <div class="prog-note">45% minted — 2,475 / 5,000 NFTs</div>
+            <div class="mint-stats">
+              <div class="mint-stat"><div class="mint-stat-val accent">5,000</div><div class="mint-stat-key">Total Supply</div></div>
+              <div class="mint-stat"><div class="mint-stat-val">$20</div><div class="mint-stat-key">Mint Credit</div></div>
+              <div class="mint-stat"><div class="mint-stat-val accent">2/mo</div><div class="mint-stat-key">Free Raffles</div></div>
+              <div class="mint-stat"><div class="mint-stat-val">SOL</div><div class="mint-stat-key">Chain</div></div>
+            </div>
+            <div class="mint-divider"></div>
+            <div class="wallet-list">
+              <a class="wallet-item" href="https://phantom.app/" target="_blank" rel="noopener"><span>👻 Phantom</span><span class="wallet-arrow">→</span></a>
+              <a class="wallet-item" href="https://backpack.app/" target="_blank" rel="noopener"><span>🎒 Backpack</span><span class="wallet-arrow">→</span></a>
+              <a class="wallet-item" href="https://jup.ag/" target="_blank" rel="noopener"><span>🌀 Jupiter</span><span class="wallet-arrow">→</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section style="padding: 0 0 90px;">
+    <div class="wrap">
+      <div class="stats-row fade">
+        <div class="stat-cell"><div class="stat-num">5,000</div><div class="stat-lbl">Founder NFTs across 3 tiers</div></div>
+        <div class="stat-cell"><div class="stat-num">₿1</div><div class="stat-lbl">Bitcoin grand prize jackpot</div></div>
+        <div class="stat-cell"><div class="stat-num">24</div><div class="stat-lbl">Free raffles per year per holder</div></div>
+        <div class="stat-cell"><div class="stat-num">+200%</div><div class="stat-lbl">Max ticket boost — Gold tier</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARKET OPPORTUNITY -->
+  <section id="market">
+    <div class="wrap">
+      <span class="eyebrow fade">Market Opportunity</span>
+      <h2 class="title fade d1">A $300B+ Market<br>Waiting to Be Disrupted</h2>
+      <p class="lead fade d2">RaffleCity sits at the intersection of gaming, speculation, digital ownership and real-world prize aspiration — a category that is naturally viral, emotionally strong and highly adaptable to Web3.</p>
+      <div class="market-img-wrap fade d2">
+        <img src="market-opportunity.png" alt="RaffleCity market opportunity">
+      </div>
+    </div>
+  </section>
+
+  <!-- FOUNDER STORY -->
+  <section id="founder">
+    <div class="wrap">
+      <div class="glass fade" style="padding: 40px 44px; position: relative; overflow: hidden;">
+        <div style="position:absolute; top:0; left:0; right:0; height:1px; background: linear-gradient(90deg, transparent 10%, rgba(123,92,255,.45) 40%, rgba(242,79,200,.45) 60%, transparent 90%);"></div>
+        <div style="display:grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center;">
+          <div>
+            <span class="eyebrow" style="display:inline-flex; margin-bottom:18px;">Vision & Mission</span>
+            <h2 class="title" style="margin-bottom:16px;">Rebuilding raffles<br>around the player.</h2>
+            <p style="font-size:16px; line-height:1.8; color:var(--w55); margin-bottom:0;">RaffleCity was born to disrupt the legacy lottery world — opaque, unfair and player-hostile. By combining Web3 technology, NFTs and smart contracts, we built a decentralized raffle ecosystem where <strong style="color:#fff;">fairness is verifiable, rewards are real</strong> and early supporters own a piece of what's coming.</p>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="padding:16px 18px; border-radius:14px; background:var(--w04); border:1px solid var(--border);">
+              <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:5px;">⚖️ Fairness First</div>
+              <div style="font-size:13px; color:var(--w55); line-height:1.6;">Smart contracts make every draw provably fair. No black boxes.</div>
+            </div>
+            <div style="padding:16px 18px; border-radius:14px; background:var(--w04); border:1px solid var(--border);">
+              <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:5px;">🔍 Transparent by Design</div>
+              <div style="font-size:13px; color:var(--w55); line-height:1.6;">Odds, prize pools and ownership — all visible on-chain, always.</div>
+            </div>
+            <div style="padding:16px 18px; border-radius:14px; background:var(--w04); border:1px solid var(--border);">
+              <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:5px;">🏆 Meaningful Prizes</div>
+              <div style="font-size:13px; color:var(--w55); line-height:1.6;">From Bitcoin to luxury real-world assets — jackpots built to matter.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLATFORM MODEL -->
+  <section id="platform">
+    <div class="wrap">
+      <span class="eyebrow fade">Platform Model</span>
+      <h2 class="title fade d1">One engine.<br>Five verticals.<br>Endless prizes.</h2>
+      <p class="lead fade d2" style="margin-bottom:48px;">RaffleCity is not a single raffle product — it's the infrastructure layer that powers every type of raffle, for every type of user, at any scale.</p>
+
+      <!-- Flywheel visual -->
+      <div class="glass fade" style="padding:40px 44px; margin-bottom:20px; position:relative; overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 10%,rgba(123,92,255,.45) 40%,rgba(242,79,200,.45) 60%,transparent 90%);"></div>
+        <div style="text-align:center; margin-bottom:36px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--w30);">// The RaffleCity Flywheel</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;">
+          <!-- connector line -->
+          <div style="position:absolute;top:28px;left:calc(12.5% + 8px);right:calc(12.5% + 8px);height:2px;background:linear-gradient(90deg,var(--violet),var(--pink));z-index:0;"></div>
+          <div style="text-align:center;position:relative;z-index:1;">
+            <div style="width:56px;height:56px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px;">🎟️</div>
+            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:5px;">Players Enter</div>
+            <div style="font-size:12px;color:var(--w55);line-height:1.6;max-width:130px;margin:0 auto;">Fees fund prize pools in real time</div>
+          </div>
+          <div style="text-align:center;position:relative;z-index:1;">
+            <div style="width:56px;height:56px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px;">🏆</div>
+            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:5px;">Big Prizes Win</div>
+            <div style="font-size:12px;color:var(--w55);line-height:1.6;max-width:130px;margin:0 auto;">Winners share, virality spreads</div>
+          </div>
+          <div style="text-align:center;position:relative;z-index:1;">
+            <div style="width:56px;height:56px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px;">📈</div>
+            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:5px;">More Players</div>
+            <div style="font-size:12px;color:var(--w55);line-height:1.6;max-width:130px;margin:0 auto;">Bigger audience, bigger demand</div>
+          </div>
+          <div style="text-align:center;position:relative;z-index:1;">
+            <div style="width:56px;height:56px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px;">💎</div>
+            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:5px;">Bigger Prizes</div>
+            <div style="font-size:12px;color:var(--w55);line-height:1.6;max-width:130px;margin:0 auto;">The loop compounds — and repeats</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenue streams -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;" class="fade d2">
+        <div style="padding:22px;border-radius:var(--r);background:var(--w04);border:1px solid var(--border);display:flex;gap:14px;align-items:flex-start;">
+          <span style="font-size:24px;flex-shrink:0;">💳</span>
+          <div><div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:5px;">Entry Fees</div><div style="font-size:13px;color:var(--w55);line-height:1.65;">Every ticket purchased generates platform revenue that loops directly back into prize pools.</div></div>
+        </div>
+        <div style="padding:22px;border-radius:var(--r);background:var(--w04);border:1px solid var(--border);display:flex;gap:14px;align-items:flex-start;">
+          <span style="font-size:24px;flex-shrink:0;">📢</span>
+          <div><div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:5px;">Brand Campaigns</div><div style="font-size:13px;color:var(--w55);line-height:1.65;">Brands pay to host sponsored raffles — product launches, exclusives and inventory distribution.</div></div>
+        </div>
+        <div style="padding:22px;border-radius:var(--r);background:var(--w04);border:1px solid var(--border);display:flex;gap:14px;align-items:flex-start;">
+          <span style="font-size:24px;flex-shrink:0;">🏛️</span>
+          <div><div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:5px;">Founder Club</div><div style="font-size:13px;color:var(--w55);line-height:1.65;">NFT mint and secondary royalties reinvest into the ecosystem — aligned incentives from day one.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VERTICALS — moved up, stronger framing -->
+  <section id="verticals">
+    <div class="wrap">
+      <span class="eyebrow fade">Five Verticals</span>
+      <h2 class="title fade d1">Not just raffles.<br>A full ecosystem.</h2>
+      <p class="lead fade d2" style="margin-bottom:40px;">RaffleCity is built to power every use case — consumer, brand, community, cause and real-world asset distribution.</p>
+      <div class="vert-grid fade d2">
+        <div class="vert-card">
+          <span class="vert-icon">🌐</span>
+          <div class="vert-name">B2C Raffles</div>
+          <p class="vert-desc">The core — crypto, NFTs and high-value prizes for everyday players worldwide.</p>
+        </div>
+        <div class="vert-card">
+          <span class="vert-icon">🤝</span>
+          <div class="vert-name">P2P Raffles</div>
+          <p class="vert-desc">Anyone can create and host their own raffle — fully on-chain, fully transparent.</p>
+        </div>
+        <div class="vert-card">
+          <span class="vert-icon">📢</span>
+          <div class="vert-name">B2B Brands</div>
+          <p class="vert-desc">Brands launch products and campaigns through raffles — measurable buzz, direct conversion.</p>
+        </div>
+        <div class="vert-card">
+          <span class="vert-icon">❤️</span>
+          <div class="vert-name">Charity</div>
+          <p class="vert-desc">Cause-driven raffles aligning entertainment, fundraising and real social impact.</p>
+        </div>
+        <div class="vert-card">
+          <span class="vert-icon">🏠</span>
+          <div class="vert-name">RWA Mega</div>
+          <p class="vert-desc">Cars, watches, property — high-value real-world assets distributed through raffles.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WARM UP -->
+  <section id="warmup">
+    <div class="wrap">
+      <div class="warmup-grid">
+        <div class="warmup-body">
+          <span class="eyebrow fade">Phase 02 · Pre-Launch</span>
+          <h2 class="title fade d1">Warm Up<br>Ecosystem</h2>
+          <p class="lead fade d1" style="margin-bottom:28px;">Play before the platform launches. Every game earns you Raffle Tickets — entries into the inaugural Mega Raffle for Bitcoin, Ethereum and a Bored Ape NFT.</p>
+
+          <!-- Games breakdown -->
+          <div class="fade d2" style="display:flex;flex-direction:column;gap:9px;margin-bottom:28px;">
+            <div style="display:flex;align-items:center;gap:13px;padding:13px 16px;border-radius:13px;background:var(--w04);border:1px solid var(--border);">
+              <span style="font-size:20px;flex-shrink:0;">🎁</span>
+              <div><span style="font-size:13px;font-weight:700;color:#fff;">Chest Game</span> <span style="font-size:12px;color:var(--w30);">—</span> <span style="font-size:13px;color:var(--w55);">Open a chest, reveal instant crypto or ticket rewards</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:13px;padding:13px 16px;border-radius:13px;background:var(--w04);border:1px solid var(--border);">
+              <span style="font-size:20px;flex-shrink:0;">🎰</span>
+              <div><span style="font-size:13px;font-weight:700;color:#fff;">Lucky Spin</span> <span style="font-size:12px;color:var(--w30);">—</span> <span style="font-size:13px;color:var(--w55);">Spin the wheel for ticket boosts and bonus drops</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:13px;padding:13px 16px;border-radius:13px;background:var(--w04);border:1px solid var(--border);">
+              <span style="font-size:20px;flex-shrink:0;">⚡</span>
+              <div><span style="font-size:13px;font-weight:700;color:#fff;">Instant Drops</span> <span style="font-size:12px;color:var(--w30);">—</span> <span style="font-size:13px;color:var(--w55);">Timed events — catch the drop, win NFTs or tickets</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:13px;padding:13px 16px;border-radius:13px;background:var(--w04);border:1px solid var(--border);">
+              <span style="font-size:20px;flex-shrink:0;">📋</span>
+              <div><span style="font-size:13px;font-weight:700;color:#fff;">Bonus Quests</span> <span style="font-size:12px;color:var(--w30);">—</span> <span style="font-size:13px;color:var(--w55);">Complete missions, earn extra ticket multipliers</span></div>
+            </div>
+          </div>
+
+          <!-- Exclusive jackpot note -->
+          <div class="fade d3" style="padding:16px 18px;border-radius:13px;background:rgba(123,92,255,.07);border:1px solid rgba(123,92,255,.2);margin-bottom:28px;display:flex;gap:12px;align-items:flex-start;">
+            <span style="font-size:18px;flex-shrink:0;">🔒</span>
+            <p style="font-size:13px;color:var(--w80);line-height:1.65;margin:0;"><strong style="color:#fff;">Exclusive launch jackpot</strong> — distributed only to Warm Up participants when the platform goes live. Late arrivals are not eligible.</p>
+          </div>
+
+          <div class="fade d3">
+            <a class="btn btn-primary" href="#nfts">Get Warm Up Access →</a>
+          </div>
+        </div>
+        <div class="warmup-img-card fade d1">
+          <img src="warmup-preview.png" alt="Warm Up Platform Preview">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEGA RAFFLE -->
+  <section id="raffle">
+    <div class="wrap">
+      <div class="raffle-banner glass fade">
+        <div class="raffle-layout">
+          <div>
+            <span class="eyebrow" style="display:inline-flex;">🔥 Inaugural Event</span>
+            <h2 class="raffle-title">The biggest degen<br>raffle <span class="pink">ever built</span></h2>
+            <p class="raffle-desc">This is not supposed to feel normal. It's supposed to feel massive — a Web3 event so large that late users will wish they had started sooner.</p>
+          </div>
+          <div class="prize-list">
+            <div class="prize-row"><span class="prize-emoji">₿</span><div><div class="prize-name">1 Bitcoin</div><div class="prize-tag">Grand Prize</div></div></div>
+            <div class="prize-row"><span class="prize-emoji">⟠</span><div><div class="prize-name">25 Ethereum</div><div class="prize-tag">Multi-Winner</div></div></div>
+            <div class="prize-row"><span class="prize-emoji">🦍</span><div><div class="prize-name">Bored Ape NFT</div><div class="prize-tag">Blue Chip</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prize-cards-row fade">
+        <div class="prize-card"><div class="prize-visual btc">₿</div><div class="prize-card-body"><div class="prize-card-name">1 Bitcoin</div><p class="prize-card-desc">The grand prize. Designed to create immediate market attention and maximum FOMO.</p></div></div>
+        <div class="prize-card"><div class="prize-visual eth">⟠</div><div class="prize-card-body"><div class="prize-card-name">25 Ethereum</div><p class="prize-card-desc">Multi-winner allocation — more people win, excitement spreads wider.</p></div></div>
+        <div class="prize-card"><div class="prize-visual nft">🦍</div><div class="prize-card-body"><div class="prize-card-name">Bored Ape NFT</div><p class="prize-card-desc">Iconic Web3 blue-chip. Pulls in the collector and culture crowd.</p></div></div>
+      </div>
+
+      <div class="boost-row glass fade">
+        <div class="boost-text">
+          <strong>The raffle is completely FREE — no purchase required</strong>
+          <p>Earn tickets by playing Warm Up games & community events. Founder holders receive 100–200% boost multipliers based on tier.</p>
+        </div>
+        <a class="btn btn-primary" href="#nfts" style="flex-shrink:0;">Get Your Boost →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOUNDER NFTS -->
+  <section id="nfts">
+    <div class="wrap">
+      <div style="text-align:center; max-width:580px; margin: 0 auto;">
+        <span class="eyebrow fade">Founder Club</span>
+        <h2 class="title fade d1" style="text-align:center;">NFT Membership Tiers</h2>
+        <p class="lead fade d2" style="margin: 0 auto; text-align:center;">Your NFT is a membership layer — recurring raffles, ecosystem perks and stronger positioning in every launch event.</p>
+      </div>
+      <div class="tiers-grid">
+        <div class="tier-card fade">
+          <div class="tier-visual bronze"><span class="tier-medal">🥉</span></div>
+          <div class="tier-body">
+            <div class="tier-name">Bronze</div>
+            <div class="tier-sub">Entry Tier · Founder Club</div>
+            <div class="tier-price bronze">0.5 SOL</div>
+            <div class="tier-supply">Supply: 3,000</div>
+            <ul class="tier-perks"><li>2 free raffles every month</li><li>$20 mint credit for Warm Up</li><li>Bronze exclusive prize pools</li><li>Warm Up participation bonus</li></ul>
+            <span class="boost-pill bronze">+100% Ticket Boost</span>
+          </div>
+        </div>
+        <div class="tier-card mid fade d1">
+          <div class="tier-visual silver"><span class="tier-medal">🥈</span></div>
+          <div class="tier-body">
+            <div class="tier-name">Silver</div>
+            <div class="tier-sub">Mid Tier · Founder Club</div>
+            <div class="tier-price silver">1.5 SOL</div>
+            <div class="tier-supply">Supply: 1,500</div>
+            <ul class="tier-perks"><li>2 free raffles every month</li><li>$20 mint credit for Warm Up</li><li>Silver premium prize pools</li><li>Stronger Mega Raffle positioning</li></ul>
+            <span class="boost-pill silver">+150% Ticket Boost</span>
+          </div>
+        </div>
+        <div class="tier-card fade d2">
+          <div class="tier-visual gold"><span class="tier-medal">🥇</span></div>
+          <div class="tier-body">
+            <div class="tier-name">Gold</div>
+            <div class="tier-sub">Elite Tier · Founder Club</div>
+            <div class="tier-price gold">4 SOL</div>
+            <div class="tier-supply">Supply: 500</div>
+            <ul class="tier-perks"><li>2 free raffles every month</li><li>$20 mint credit for Warm Up</li><li>Highest-value exclusive raffles</li><li>Maximum ecosystem positioning</li></ul>
+            <span class="boost-pill gold">+200% Ticket Boost</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section id="benefits">
+    <div class="wrap">
+      <div class="benefits-hero glass fade">
+        <div class="bh-layout">
+          <div>
+            <span class="eyebrow" style="display:inline-flex; margin-bottom:18px;">Core Holder Benefit</span>
+            <h2 class="bh-title"><span>2 Free Raffles</span><br>Every Single Month</h2>
+            <p class="bh-desc">Just by holding your Founder NFT — no extra cost, no subscription, no strings. For every holder, every month, for life.</p>
+          </div>
+          <div class="bh-big"><div class="bh-num">24</div><div class="bh-sub">Free / Year</div></div>
+        </div>
+      </div>
+      <div class="benefits-grid">
+        <div class="benefit-card fade"><div class="bc-icon">🎟️</div><div class="bc-title">Free Monthly Raffles</div><p class="bc-body">2 completely free raffles every month. Holding the NFT is all you need to unlock recurring prize opportunities.</p></div>
+        <div class="benefit-card fade d1"><div class="bc-icon">🏆</div><div class="bc-title">Tier Prize Pools</div><p class="bc-body">Bronze, Silver and Gold each access dedicated prize pools. Higher tier = more exclusive, more valuable raffles every month.</p></div>
+        <div class="benefit-card fade d2"><div class="bc-icon">⚡</div><div class="bc-title">Mega Raffle Boost</div><p class="bc-body">100–200% ticket multipliers for the inaugural Mega Raffle. More tickets means materially higher probability of winning Bitcoin.</p></div>
+        <div class="benefit-card fade d1"><div class="bc-icon">🎮</div><div class="bc-title">Warm Up Access</div><p class="bc-body">Early access to pre-launch games. Earn tickets, unlock random rewards and qualify for the exclusive jackpot reserved for early participants.</p></div>
+        <div class="benefit-card fade d2"><div class="bc-icon">💎</div><div class="bc-title">Ecosystem Growth</div><p class="bc-body">As the platform scales, Founder benefits evolve — higher prize quality, new verticals and stronger partner integrations flow to holders first.</p></div>
+        <div class="benefit-card fade d3"><div class="bc-icon">🔄</div><div class="bc-title">Secondary Royalties</div><p class="bc-body">Sold-out NFTs live on secondary markets. Royalties continuously reinforce the ecosystem prize pool for all Founder holders.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOKENOMICS -->
+  <section id="tokenomics">
+    <div class="wrap">
+      <span class="eyebrow fade">Tokenomics</span>
+      <h2 class="title fade d1">The RFLE Token</h2>
+      <p class="lead fade d2" style="margin-bottom:48px;">A deflationary utility token built around one simple rule — every raffle played destroys tokens permanently. More activity = less supply = more value.</p>
+
+      <div class="token-layout">
+        <!-- Left: donut + legend -->
+        <div class="fade">
+          <div class="token-ring-wrap">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#7b5cff"/><stop offset="100%" stop-color="#f24fc8"/></linearGradient></defs>
+              <circle cx="100" cy="100" r="78" fill="none" stroke="#12142c" stroke-width="30"/>
+              <circle cx="100" cy="100" r="78" fill="none" stroke="#7b5cff" stroke-width="30" stroke-dasharray="196.0 490" stroke-dashoffset="0" transform="rotate(-90 100 100)"/>
+              <circle cx="100" cy="100" r="78" fill="none" stroke="#f24fc8" stroke-width="30" stroke-dasharray="122.5 563.5" stroke-dashoffset="-196" transform="rotate(-90 100 100)"/>
+              <circle cx="100" cy="100" r="78" fill="none" stroke="#a78bfa" stroke-width="30" stroke-dasharray="98.0 588" stroke-dashoffset="-318.5" transform="rotate(-90 100 100)"/>
+              <circle cx="100" cy="100" r="78" fill="none" stroke="#e879f9" stroke-width="30" stroke-dasharray="73.5 612.5" stroke-dashoffset="-416.5" transform="rotate(-90 100 100)"/>
+              <circle cx="100" cy="100" r="53" fill="#060713"/>
+              <text x="100" y="96" text-anchor="middle" fill="url(#g1)" font-family="Inter,sans-serif" font-weight="900" font-size="16" letter-spacing="-1">RFLE</text>
+              <text x="100" y="112" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-family="Inter,sans-serif" font-size="9" letter-spacing="1">TOKEN</text>
+            </svg>
+          </div>
+          <div class="token-legend">
+            <div class="tl-item"><div class="tl-dot" style="background:#7b5cff;"></div><span class="tl-label">Ecosystem Rewards</span><span class="tl-pct">40%</span></div>
+            <div class="tl-item"><div class="tl-dot" style="background:#f24fc8;"></div><span class="tl-label">Liquidity</span><span class="tl-pct">25%</span></div>
+            <div class="tl-item"><div class="tl-dot" style="background:#a78bfa;"></div><span class="tl-label">Community Incentives</span><span class="tl-pct">20%</span></div>
+            <div class="tl-item"><div class="tl-dot" style="background:#e879f9;"></div><span class="tl-label">Development</span><span class="tl-pct">15%</span></div>
+          </div>
+        </div>
+
+        <!-- Right: mechanics -->
+        <div class="token-right fade d1">
+          <div class="token-name">RFLE</div>
+          <p class="token-desc">RFLE is the currency of RaffleCity. You buy it in SOL, USDC or USDT — at a price always indexed in USD. You use it to enter raffles. Then it's gone forever.</p>
+
+          <!-- 3 mechanics cards -->
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+
+            <div style="padding:16px 18px;border-radius:14px;background:rgba(123,92,255,.07);border:1px solid rgba(123,92,255,.2);display:flex;gap:14px;align-items:flex-start;">
+              <span style="font-size:22px;flex-shrink:0;">💳</span>
+              <div>
+                <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:4px;">Buy RFLE — priced in USD</div>
+                <div style="font-size:13px;color:var(--w55);line-height:1.6;">Purchase with SOL, USDC or USDT. The token price is indexed to USD so raffle costs stay predictable regardless of market volatility.</div>
+              </div>
+            </div>
+
+            <div style="padding:16px 18px;border-radius:14px;background:rgba(242,79,200,.07);border:1px solid rgba(242,79,200,.2);display:flex;gap:14px;align-items:flex-start;">
+              <span style="font-size:22px;flex-shrink:0;">🔥</span>
+              <div>
+                <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:4px;">100% Burn on every raffle</div>
+                <div style="font-size:13px;color:var(--w55);line-height:1.6;">Every RFLE spent to enter a raffle is permanently destroyed. No redistribution, no recycling. The supply shrinks with every single participation.</div>
+              </div>
+            </div>
+
+            <div style="padding:16px 18px;border-radius:14px;background:rgba(123,92,255,.07);border:1px solid rgba(123,92,255,.2);display:flex;gap:14px;align-items:flex-start;">
+              <span style="font-size:22px;flex-shrink:0;">🎁</span>
+              <div>
+                <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:4px;">Earn RFLE — trade or play</div>
+                <div style="font-size:13px;color:var(--w55);line-height:1.6;">Players earn RFLE via Warm Up games, quests and as bonus prizes inside raffles. These can be used to play or sold on the secondary market.</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Flywheel -->
+          <div class="flywheel">
+            <div class="fw-label">// The Deflationary Flywheel</div>
+            <div class="fw-steps">
+              <div class="fw-row"><span class="fw-n">01</span>Players buy RFLE → lots are funded</div>
+              <div class="fw-arrow">↓</div>
+              <div class="fw-row"><span class="fw-n">02</span>RFLE used to play → 100% burned</div>
+              <div class="fw-arrow">↓</div>
+              <div class="fw-row"><span class="fw-n">03</span>Supply shrinks → scarcity increases</div>
+              <div class="fw-arrow">↓</div>
+              <div class="fw-row"><span class="fw-n">04</span>Token value rises → bigger lots possible</div>
+              <div class="fw-arrow">↓</div>
+              <div class="fw-row"><span class="fw-n">05</span>Bigger lots → more players → more burn</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section id="roadmap">
+    <div class="wrap">
+      <span class="eyebrow fade">Roadmap</span>
+      <h2 class="title fade d1">The Path to Scale</h2>
+      <p class="lead fade d2" style="margin-bottom: 48px;">Five phases transforming an early mint into the world's largest decentralized raffle ecosystem.</p>
+      <div class="roadmap-track">
+        <div class="rm-item fade"><div class="rm-dot" style="background:var(--violet);"></div><div class="rm-card glass"><div class="rm-inner"><div class="rm-phase"><div class="rm-phase-lbl">Phase</div><div class="rm-phase-num">01</div></div><div class="rm-content"><span class="rm-tag">Foundation</span><div class="rm-title">Founder NFT Mint</div><p class="rm-body">Launch of the Founder collection across 3 tiers. Community formation and the first layer of membership utility establishing the earliest supporters.</p></div></div></div></div>
+        <div class="rm-item fade"><div class="rm-dot"></div><div class="rm-card glass"><div class="rm-inner"><div class="rm-phase"><div class="rm-phase-lbl">Phase</div><div class="rm-phase-num">02</div></div><div class="rm-content"><span class="rm-tag">Engagement Engine</span><div class="rm-title">Warm Up Platform</div><p class="rm-body">Launch of the playable Warm Up phase — games, raffle tickets, random rewards and the exclusive launch jackpot for early participants.</p></div></div></div></div>
+        <div class="rm-item fade"><div class="rm-dot"></div><div class="rm-card glass"><div class="rm-inner"><div class="rm-phase"><div class="rm-phase-lbl">Phase</div><div class="rm-phase-num">03</div></div><div class="rm-content"><span class="rm-tag">Core Platform</span><div class="rm-title">RaffleCity Ecosystem</div><p class="rm-body">Full platform deployment with recurring raffles, prize pools and a broader ecosystem structure designed to scale participation and monetization.</p></div></div></div></div>
+        <div class="rm-item fade"><div class="rm-dot"></div><div class="rm-card glass"><div class="rm-inner"><div class="rm-phase"><div class="rm-phase-lbl">Phase</div><div class="rm-phase-num">04</div></div><div class="rm-content"><span class="rm-tag">Token Launch</span><div class="rm-title">RFLE Token & Governance</div><p class="rm-body">Introduction of RFLE enabling governance, discounted entries, ecosystem incentives and alignment between community growth and platform usage.</p></div></div></div></div>
+        <div class="rm-item fade"><div class="rm-dot"></div><div class="rm-card glass"><div class="rm-inner"><div class="rm-phase"><div class="rm-phase-lbl">Phase</div><div class="rm-phase-num">05</div></div><div class="rm-content"><span class="rm-tag">Scale & Partnerships</span><div class="rm-title">P2P, Brands, RWA & Global Scale</div><p class="rm-body">Launch of Peer-to-Peer Raffles — users create and host their own raffles directly on-chain. Alongside: real-world asset integration, brand partnerships, product launch campaigns and the full expansion of RaffleCity into a global decentralized raffle infrastructure.</p></div></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL PROOF + TRUST -->
+  <section id="trust">
+    <div class="wrap">
+
+      <!-- Community numbers -->
+      <div class="glass fade" style="padding:32px 40px;margin-bottom:20px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 10%,rgba(123,92,255,.45) 40%,rgba(242,79,200,.45) 60%,transparent 90%);"></div>
+        <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;">
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--w30);margin-bottom:12px;">// Community</div>
+            <div style="display:flex;gap:32px;flex-wrap:wrap;">
+              <div>
+                <div style="font-size:32px;font-weight:900;letter-spacing:-.03em;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;">2,400+</div>
+                <div style="font-size:12px;color:var(--w55);margin-top:3px;">Discord Members</div>
+              </div>
+              <div>
+                <div style="font-size:32px;font-weight:900;letter-spacing:-.03em;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;">1,800+</div>
+                <div style="font-size:12px;color:var(--w55);margin-top:3px;">X Followers</div>
+              </div>
+              <div>
+                <div style="font-size:32px;font-weight:900;letter-spacing:-.03em;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;">900+</div>
+                <div style="font-size:12px;color:var(--w55);margin-top:3px;">Telegram Members</div>
+              </div>
+              <div>
+                <div style="font-size:32px;font-weight:900;letter-spacing:-.03em;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;">5,000</div>
+                <div style="font-size:12px;color:var(--w55);margin-top:3px;">Founder NFTs</div>
+              </div>
+            </div>
+          </div>
+          <div></div>
+          <div style="display:flex;gap:10px;flex-direction:column;align-items:flex-end;">
+            <a href="https://discord.gg/k9apu7HKtm" target="_blank" rel="noopener" class="btn btn-ghost" style="padding:10px 18px;font-size:13px;">💬 Join Discord</a>
+            <a href="https://twitter.com/raffle_city" target="_blank" rel="noopener" class="btn btn-ghost" style="padding:10px 18px;font-size:13px;">𝕏 Follow on X</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- How a draw works — transparency -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="glass fade" style="padding:32px 36px;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(123,92,255,.4),transparent);"></div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--w30);margin-bottom:16px;">// How a Draw Works</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;gap:13px;align-items:flex-start;">
+              <div style="width:28px;height:28px;border-radius:8px;background:rgba(123,92,255,.12);border:1px solid rgba(123,92,255,.22);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--violet);flex-shrink:0;">01</div>
+              <div style="font-size:13.5px;color:var(--w80);line-height:1.6;padding-top:3px;">Player buys a ticket — transaction recorded on-chain instantly</div>
+            </div>
+            <div style="display:flex;gap:13px;align-items:flex-start;">
+              <div style="width:28px;height:28px;border-radius:8px;background:rgba(123,92,255,.12);border:1px solid rgba(123,92,255,.22);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--violet);flex-shrink:0;">02</div>
+              <div style="font-size:13.5px;color:var(--w80);line-height:1.6;padding-top:3px;">Smart contract locks all entries — no modification possible</div>
+            </div>
+            <div style="display:flex;gap:13px;align-items:flex-start;">
+              <div style="width:28px;height:28px;border-radius:8px;background:rgba(123,92,255,.12);border:1px solid rgba(123,92,255,.22);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--violet);flex-shrink:0;">03</div>
+              <div style="font-size:13.5px;color:var(--w80);line-height:1.6;padding-top:3px;">Verifiable random function (VRF) selects the winner — provably fair</div>
+            </div>
+            <div style="display:flex;gap:13px;align-items:flex-start;">
+              <div style="width:28px;height:28px;border-radius:8px;background:rgba(123,92,255,.12);border:1px solid rgba(123,92,255,.22);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--violet);flex-shrink:0;">04</div>
+              <div style="font-size:13.5px;color:var(--w80);line-height:1.6;padding-top:3px;">Prize sent automatically — no human intermediary, no delays</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass fade d1" style="padding:32px 36px;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(242,79,200,.4),transparent);"></div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--w30);margin-bottom:16px;">// Security & Transparency</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+              <span style="font-size:18px;flex-shrink:0;">🔒</span>
+              <div><div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:3px;">Smart Contract Governed</div><div style="font-size:13px;color:var(--w55);line-height:1.6;">Every raffle runs entirely on-chain. Rules are written in code — not policy.</div></div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+              <span style="font-size:18px;flex-shrink:0;">🎲</span>
+              <div><div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:3px;">Provably Fair Draws</div><div style="font-size:13px;color:var(--w55);line-height:1.6;">Winners are selected by a verified random function — publicly verifiable by anyone.</div></div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+              <span style="font-size:18px;flex-shrink:0;">🔎</span>
+              <div><div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:3px;">Fully Auditable</div><div style="font-size:13px;color:var(--w55);line-height:1.6;">Prize pools, ticket counts and draw results are visible on-chain — zero black boxes.</div></div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+              <span style="font-size:18px;flex-shrink:0;">📄</span>
+              <div><div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:3px;">Whitepaper Available</div><div style="font-size:13px;color:var(--w55);line-height:1.6;"><a href="https://gitbook.rafflecity.io/rafflecity" target="_blank" rel="noopener" style="color:var(--violet);text-decoration:underline;text-underline-offset:3px;">Read the full technical documentation →</a></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="wrap">
+      <span class="eyebrow fade">FAQ</span>
+      <h2 class="title fade d1">Questions Answered</h2>
+      <div class="faq-list fade d2">
+        <div class="faq-item"><button class="faq-btn" onclick="faq(this)">What makes RaffleCity different from a simple raffle website?<span class="faq-plus">+</span></button><div class="faq-body"><div class="faq-body-inner">RaffleCity is an <strong>ecosystem</strong>, not a single product. It combines recurring raffles, a Warm Up engine, Founder NFT utility, RFLE token incentives and multiple growth verticals — all governed by smart contracts for provable fairness.</div></div></div>
+        <div class="faq-item"><button class="faq-btn" onclick="faq(this)">Is the platform actually fair? How do I know the draw isn't rigged?<span class="faq-plus">+</span></button><div class="faq-body"><div class="faq-body-inner">Every raffle runs on a <strong>smart contract on Solana</strong>. Winners are selected by a Verifiable Random Function (VRF) — a cryptographic method anyone can verify on-chain. No human touches the draw process. The result is published on the blockchain permanently.</div></div></div>
+        <div class="faq-item"><button class="faq-btn" onclick="faq(this)">Why is Warm Up strategically important?<span class="faq-plus">+</span></button><div class="faq-body"><div class="faq-body-inner">Warm Up lets RaffleCity <strong>generate early revenue, grow community and build a launch jackpot before the token release</strong>. Early players are also best positioned for the inaugural Mega Raffle with more tickets accumulated.</div></div></div>
+        <div class="faq-item"><button class="faq-btn" onclick="faq(this)">How does the RFLE token work exactly?<span class="faq-plus">+</span></button><div class="faq-body"><div class="faq-body-inner">RFLE is the currency of RaffleCity. You <strong>buy it in SOL, USDC or USDT</strong> at a price indexed in USD. You use it to enter raffles. When you play, <strong>100% of the RFLE spent is permanently burned</strong> — destroyed on-chain, irreversibly. No recycling, no redistribution. Every participation shrinks the total supply.</div></div></div>
+        <div class="faq-item"><button class="faq-btn" onclick="faq(this)">Why does 100% burn make the token more valuable over time?<span class="faq-plus">+</span></button><div class="faq-body"><div class="faq-body-inner">Simple supply and demand. Every raffle played destroys tokens permanently. The more the platform grows, the faster the supply shrinks. <strong>A smaller supply with steady or growing demand means each remaining token is worth more</strong>. Holding RFLE long-term becomes strategically interesting as the ecosystem scales.</div></div></div>
+        <div class="faq-item"><button class="faq-btn" onclick="faq(this)">Why launch with such a large inaugural raffle?<span class="faq-plus">+</span></button><div class="faq-body"><div class="faq-body-inner">Because attention is strategic. A massive inaugural event creates <strong>stronger social traction, deeper emotional engagement and clear differentiation</strong>. It becomes a cultural Web3 moment — users want in because the upside is simply too big to ignore.</div></div></div>
+        <div class="faq-item"><button class="faq-btn" onclick="faq(this)">What does the Founder Club actually unlock?<span class="faq-plus">+</span></button><div class="faq-body"><div class="faq-body-inner"><strong>2 free monthly raffles, 100–200% Mega Raffle ticket boosts, $20 Warm Up credit, ongoing ecosystem utility and premium positioning</strong>. As the platform grows, so does the value of being an early Founder.</div></div></div>
+        <div class="faq-item"><button class="faq-btn" onclick="faq(this)">How does RaffleCity scale beyond crypto users?<span class="faq-plus">+</span></button><div class="faq-body"><div class="faq-body-inner">Through product-launch raffles, brand collaborations, real-world prize campaigns and P2P raffles. You don't need to be crypto-native to want to win a car, a watch or a luxury experience.</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="join" style="padding: 80px 0 100px;">
+    <div class="wrap">
+      <div class="cta-box glass fade">
+        <span class="eyebrow" style="display:inline-flex; margin-bottom:22px;">Early Access</span>
+        <h2 class="cta-title">Join the <span>RaffleCity Founders</span></h2>
+        <p class="cta-sub">Secure your Founder NFT and enter the ecosystem before the platform, token and inaugural flagship raffle fully go live.</p>
+        <div class="cta-btns">
+          <a class="btn btn-primary" href="#">Mint Coming Soon →</a>
+          <a class="btn btn-ghost" href="https://rafflecity.io" target="_blank" rel="noopener">Visit rafflecity.io</a>
+        </div>
+        <div class="cta-socials">
+          <a class="social-pill" href="https://discord.gg/k9apu7HKtm" target="_blank" rel="noopener">💬 Discord</a>
+          <a class="social-pill" href="https://twitter.com/raffle_city" target="_blank" rel="noopener">𝕏 Twitter</a>
+          <a class="social-pill" href="https://t.me/RaffleCityChat" target="_blank" rel="noopener">✈️ Telegram</a>
+          <a class="social-pill" href="https://gitbook.rafflecity.io/rafflecity" target="_blank" rel="noopener">📖 Whitepaper</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="wrap">
+
+      <!-- Community CTA bar -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:48px;">
+        <a href="https://discord.gg/k9apu7HKtm" target="_blank" rel="noopener" style="padding:20px 22px;border-radius:var(--r);background:var(--w04);border:1px solid var(--border);display:flex;gap:14px;align-items:center;transition:border-color .2s,transform .2s;" onmouseover="this.style.borderColor='rgba(123,92,255,.28)';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+          <span style="font-size:26px;flex-shrink:0;">💬</span>
+          <div><div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:2px;">Discord</div><div style="font-size:12px;color:var(--w55);">Join the community →</div></div>
+        </a>
+        <a href="https://twitter.com/raffle_city" target="_blank" rel="noopener" style="padding:20px 22px;border-radius:var(--r);background:var(--w04);border:1px solid var(--border);display:flex;gap:14px;align-items:center;transition:border-color .2s,transform .2s;" onmouseover="this.style.borderColor='rgba(123,92,255,.28)';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+          <span style="font-size:26px;flex-shrink:0;">𝕏</span>
+          <div><div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:2px;">Twitter / X</div><div style="font-size:12px;color:var(--w55);">Follow @raffle_city →</div></div>
+        </a>
+        <a href="https://t.me/RaffleCityChat" target="_blank" rel="noopener" style="padding:20px 22px;border-radius:var(--r);background:var(--w04);border:1px solid var(--border);display:flex;gap:14px;align-items:center;transition:border-color .2s,transform .2s;" onmouseover="this.style.borderColor='rgba(123,92,255,.28)';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+          <span style="font-size:26px;flex-shrink:0;">✈️</span>
+          <div><div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:2px;">Telegram</div><div style="font-size:12px;color:var(--w55);">Chat with the team →</div></div>
+        </a>
+      </div>
+
+      <div class="footer-grid">
+        <div>
+          <img src="rafflecity-logo-full-transparent.png" alt="RaffleCity" class="footer-logo">
+          <p class="footer-desc">Building a premium Web3-native raffle ecosystem combining digital ownership, high-value prize culture, branded engagement, real-world assets and long-term tokenized incentives.</p>
+          <div class="footer-links">
+            <a class="footer-link" href="#market">Market</a>
+            <a class="footer-link" href="#warmup">Warm Up</a>
+            <a class="footer-link" href="#raffle">Mega Raffle</a>
+            <a class="footer-link" href="#nfts">Founder NFTs</a>
+            <a class="footer-link" href="#tokenomics">Token</a>
+            <a class="footer-link" href="#roadmap">Roadmap</a>
+            <a class="footer-link" href="#trust">Transparency</a>
+            <a class="footer-link" href="https://gitbook.rafflecity.io/rafflecity" target="_blank" rel="noopener">Whitepaper</a>
+          </div>
+        </div>
+        <div class="footer-right">
+          <h4>Project Highlights</h4>
+          <div class="footer-hi">
+            <span class="footer-hi-item">Warm Up generates pre-launch traction</span>
+            <span class="footer-hi-item">Founder NFTs unlock recurring utility</span>
+            <span class="footer-hi-item">RFLE aligns activity and incentives</span>
+            <span class="footer-hi-item">B2B verticals expand monetization</span>
+            <span class="footer-hi-item">RWA raffles open mainstream markets</span>
+            <span class="footer-hi-item">Provably fair — smart contract draws</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span class="footer-copy">© 2025 RaffleCity · Web3 Raffle Ecosystem · Built on Solana</span>
+        <div class="footer-mini">
+          <a href="https://gitbook.rafflecity.io/rafflecity" target="_blank" rel="noopener">Whitepaper</a>
+          <a href="https://discord.gg/k9apu7HKtm" target="_blank" rel="noopener">Discord</a>
+          <a href="https://twitter.com/raffle_city" target="_blank" rel="noopener">X</a>
+          <a href="https://t.me/RaffleCityChat" target="_blank" rel="noopener">Telegram</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const end = new Date(Date.now() + ((6*24+23)*60+28)*60000);
+    function tick() {
+      const d = end - Date.now();
+      if (d <= 0) { document.getElementById('mintCountdown').innerHTML = '<span>Mint is live!</span>'; return; }
+      const days = Math.floor(d/86400000), hours = Math.floor((d%86400000)/3600000), mins = Math.floor((d%3600000)/60000);
+      document.getElementById('mintCountdown').innerHTML = `<span>${days}d ${String(hours).padStart(2,'0')}h</span> ${String(mins).padStart(2,'0')}m`;
+    }
+    tick(); setInterval(tick, 30000);
+
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.fade').forEach(el => io.observe(el));
+
+    function faq(btn) {
+      const item = btn.closest('.faq-item'), open = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+      if (!open) item.classList.add('open');
+    }
+  </script>
+</body>
+</html>
